@@ -59,7 +59,7 @@ resource "aws_vpc_security_group_egress_rule" "all" {
 }
 resource "aws_vpc_security_group_ingress_rule" "ssh" {
   security_group_id = aws_security_group.ec2.id
-  cidr_ipv4         = "94.197.98.31/32"
+  cidr_ipv4         = "94.197.98.19/32"
   from_port         = 22
   to_port           = 22
   ip_protocol       = "tcp"
@@ -81,10 +81,15 @@ data "aws_ami" "ubuntu" {
 resource "aws_instance" "web" {
   ami                    = data.aws_ami.ubuntu.id
   instance_type          = "t3.micro"
+key_name = aws_key_pair.deployer.key_name
   subnet_id              = aws_subnet.public.id
   vpc_security_group_ids = [aws_security_group.ec2.id]
 
   tags = {
     Name = "terraform-project-ec2"
   }
+}
+resource "aws_key_pair" "deployer" {
+  key_name   = "terraform-project-key"
+  public_key = file(pathexpand("~/.ssh/terraform_aws_ec2.pub"))
 }
